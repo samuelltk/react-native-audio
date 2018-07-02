@@ -274,19 +274,26 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
     isPaused = false;
     promise.resolve(null);
   }
-
+  private int BASE = 1;
   private void startTimer(){
     timer = new Timer();
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
       public void run() {
+        double ratio = (double)recorder.getMaxAmplitude() /BASE;
+        double db = 0;// 分贝
+        if (ratio > 1)
+          db = 160.0*ratio*1.0/32767.0-160;
+//        Log.d(TAG,"分贝值："+db);
+
         if (!isPaused) {
           WritableMap body = Arguments.createMap();
           body.putDouble("currentTime", stopWatch.getTimeSeconds());
+          body.putDouble("currentMetering",db);
           sendEvent("recordingProgress", body);
         }
       }
-    }, 0, 1000);
+    }, 0, 200);
   }
 
   private void stopTimer(){
